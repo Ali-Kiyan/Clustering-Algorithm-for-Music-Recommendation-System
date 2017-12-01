@@ -7,7 +7,6 @@ library(cluster)
 head(music_cleaned)
 pairs(music_cleaned)
 plot(music_cleaned$song.hotttnesss, music_cleaned$loudness, data= music_cleaned)
-with(music_cleaned,text(music_cleaned$song.hotttnesss ~ music_cleaned$tempo, lables=music_cleaned$terms,pos=4))
 dim(music_cleaned)
 
 beats_start <- music_cleaned$beats_start
