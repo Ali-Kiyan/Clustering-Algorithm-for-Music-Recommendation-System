@@ -4,7 +4,7 @@ install.packages("dplyr")
 library(stringr)
 library(cluster)
 library(dplyr)
-music <- read.csv("music.csv", header=T)
+music <- read.csv("music.csv", header=T) 
 music_cleaned <- music[,c(1, 7, 9, 10, 11, 18, 24,26, 28, 29, 30, 32)]
 #check if there is any NA in the dataset 
 any(is.na(music_cleaned))
@@ -53,8 +53,8 @@ filter(str_detect(u$terms, "pop"))
 l <- nrow(u_bar)
 u_bar <- mean(u_bar$song.hotttnesss, na.rm = TRUE )
 
-if(grepl("pop", u$terms[5])){
-  x <- 1
+if(grepl("rock", u$terms[4])){
+  x <- 2
 }
 
 
@@ -116,29 +116,29 @@ Country_Song_hotness_mean <- mean(contains_Country$song.hotttnesss, na.rm = TRUE
 #3.impute the mean to every missing value 
 length <- nrow(music_cleaned)
 
-for(i in 1:length)
+for(i in 1:length) 
 {
   if(is.na(music_cleaned$song.hotttnesss[i]))
   {
     if(grepl("rock", music_cleaned$terms[i]))
       {
-         music_cleaned$song.hotttnesss <- Rock_Song_hotness_mean
+         music_cleaned$song.hotttnesss[i] <- Rock_Song_hotness_mean
       }
   }
 }
 
-
+min(music_cleaned$song.hotttnesss)
 
 #if a row wass zero in song hotness remove it (meaningless) note: it does not consider NAs as well
-music_cleaned <- subset(music_cleaned,song.hotttnesss!=0)
+#music_cleaned <- subset(music_cleaned,song.hotttnesss!=0)
 #making sure there is no NA left in  the dataset
 music_cleaned <- music_cleaned[complete.cases(music_cleaned),]
 #num of complete case (without NA)
 sum(as.numeric(complete.cases(music_cleaned)))
 
+max(music_cleaned$song.hotttnesss)
 
-dim(music_cleaned)
-library(cluster)
+
 head(music_cleaned)
 #getting the pair of clusters
 pairs(music_cleaned)
@@ -150,13 +150,14 @@ with(music_cleaned,text(music_cleaned$song.hotttnesss~ music_cleaned$artist.hott
 music_cleaned <- music_cleaned[,-c(11)]
 
 #normalizing with range between -1 and 1
+max(music_cleaned$song.hotttnesss)
+remove(nrml_music)
 col <- ncol(music_cleaned)
 newmin = -1
 newmax= 1
 str(nrml_music) 
 nrml_music <- 0
-for(j in 1:col)
-{
+for(j in 1:col){
   
   oldmin <- min(music_cleaned[j])
   oldmax <- max(music_cleaned[j])
