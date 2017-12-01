@@ -51,16 +51,11 @@ for(i in 1:length){
 u_bar <- u %>% 
 filter(str_detect(u$terms, "pop"))
 l <- nrow(u_bar)
-for(j in 1:l){
-  if(is.na(u_bar$song.hotttnesss[j]))
-  {
-    u_bar$song.hotttnesss[j] <- 0
-    
-  }
+u_bar <- mean(u_bar$song.hotttnesss, na.rm = TRUE )
+
+if(grepl("pop", u$terms[5])){
+  x <- 1
 }
-sum(u_bar$song.hotttnesss)
-
-
 
 
 #export the file to a csv file
@@ -81,32 +76,58 @@ hist(music_cleaned$song.hotttnesss)
 #getting the number of rows
 length <- nrow(music_cleaned)
 genre <- 0
-remove(genre)
 #1.if a row was missing check its genre 
+
+genre <- genre[-c(1),]
+genre <- data.frame(genre)
+#1.1 datasets if the terms col has pop, rock, jazz,classic, country 
+contains_rock <- music_cleaned %>% 
+  filter(str_detect(music_cleaned$terms, "rock"))
+
+contains_Jazz <- music_cleaned %>% 
+  filter(str_detect(music_cleaned$terms, "jazz"))
+
+contains_Pop <- music_cleaned %>% 
+  filter(str_detect(music_cleaned$terms, "pop"))
+
+contains_Classic <- music_cleaned %>% 
+  filter(str_detect(music_cleaned$terms, "classic"))
+
+contains_Country <- music_cleaned %>% 
+  filter(str_detect(music_cleaned$terms, "country"))
+
+#2.calc the mean for all the genras 
+
+Rock_Song_hotness_mean <- mean(contains_rock$song.hotttnesss, na.rm = TRUE)
+
+
+Jazz_Song_hotness_mean <- mean(contains_Jazz$song.hotttnesss, na.rm = TRUE)
+
+
+Pop_Song_hotness_mean <- mean(contains_Pop$song.hotttnesss, na.rm = TRUE)
+
+
+Classic_Song_hotness_mean <- mean(contains_Classic$song.hotttnesss, na.rm = TRUE)
+
+
+Country_Song_hotness_mean <- mean(contains_Country$song.hotttnesss, na.rm = TRUE)
+
+
+#3.impute the mean to every missing value 
+length <- nrow(music_cleaned)
+
 for(i in 1:length)
 {
   if(is.na(music_cleaned$song.hotttnesss[i]))
   {
-
+    if(grepl("rock", music_cleaned$terms[i]))
+      {
+         music_cleaned$song.hotttnesss <- Rock_Song_hotness_mean
+      }
   }
 }
-genre <- genre[-c(1),]
-genre <- data.frame(genre)
-#1.1 if the terms col has pop, rock, jazz,classic, country 
-
-#2.calc the mean for all the genras 
-Rock_Song_hotness_mean
-contains_rock <- music_cleaned %>% 
-  filter(str_detect(music_cleaned$terms, "rock"))
 
 
-
-Jazz_Song_hotness_mean
-Pop_Song_hotness_mean
-Classic_Song_hotness_mean
-
-#2.1 check t
-#3.impute the mean to every missing value 
 
 #if a row wass zero in song hotness remove it (meaningless) note: it does not consider NAs as well
 music_cleaned <- subset(music_cleaned,song.hotttnesss!=0)
