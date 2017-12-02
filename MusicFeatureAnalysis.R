@@ -1,9 +1,11 @@
 install.packages("stringr")
 install.packages("cluster")
 install.packages("dplyr")
-library(stringr)
+#using respective packages
+library(stringr) 
 library(cluster)
 library(dplyr)
+
 music <- read.csv("music.csv", header=T) 
 music_cleaned <- music[,c(1, 7, 9, 10, 11, 18, 24,26, 28, 29, 30, 32)]
 #check if there is any NA in the dataset 
@@ -17,11 +19,20 @@ d <- music_cleaned[which(music_cleaned == 0),]
 
 u <- music_cleaned[1:5,]
 u <- subset(u,u$song.hotttnesss !=0)
-complete.cases(u)
-na.omit(u)
-is.na(u)
-u$song.hotttnesss <- 1
+
 length <- nrow(u)
+for(i in 1:length)
+{
+  if(is.na(u$song.hotttnesss[i])){
+    u$song.hotttnesss[i] <- 0
+    u$beats_start <- 0
+  }
+}
+
+
+
+
+
 for(i in 1:length){
   if(is.na(u$song.hotttnesss[i]))
   {
@@ -126,15 +137,64 @@ for(i in 1:length)
       }
   }
 }
-
+sum(is.na(music_cleaned))
+for(i in 1:length) 
+{
+  if(is.na(music_cleaned$song.hotttnesss[i]))
+  {
+    if(grepl("jazz", music_cleaned$terms[i]))
+    {
+      music_cleaned$song.hotttnesss[i] <- Jazz_Song_hotness_mean
+    }
+  }
+}
+sum(is.na(music_cleaned))
+for(i in 1:length) 
+{
+  if(is.na(music_cleaned$song.hotttnesss[i]))
+  {
+    if(grepl("pop", music_cleaned$terms[i]))
+    {
+      music_cleaned$song.hotttnesss[i] <- Pop_Song_hotness_mean
+    }
+  }
+}
+sum(is.na(music_cleaned))
+ww <- nrow(music_cleaned) 
+for(z in 1:ww) 
+{
+  if(is.na(music_cleaned$song.hotttnesss[z]))
+  {
+    if(grepl("classic", music_cleaned$terms[z]))
+    {
+      music_cleaned$song.hotttnesss[z] <- Classic_Song_hotness_mean
+    }
+  }
+}
+sum(is.na(music_cleaned))
+for(i in 1:length) 
+{
+  if(is.na(music_cleaned$song.hotttnesss[i]))
+  {
+    if(grepl("country", music_cleaned$terms[i]))
+    {
+      music_cleaned$song.hotttnesss[i] <- Country_Song_hotness_mean
+    }
+  }
+}
+sum(is.na(music_cleaned))
 min(music_cleaned$song.hotttnesss)
 
 #if a row wass zero in song hotness remove it (meaningless) note: it does not consider NAs as well
-#music_cleaned <- subset(music_cleaned,song.hotttnesss!=0)
+music_cleaned <- subset(music_cleaned,song.hotttnesss!=0)
 #making sure there is no NA left in  the dataset
 music_cleaned <- music_cleaned[complete.cases(music_cleaned),]
 #num of complete case (without NA)
 sum(as.numeric(complete.cases(music_cleaned)))
+
+
+
+
 
 max(music_cleaned$song.hotttnesss)
 
@@ -151,11 +211,11 @@ music_cleaned <- music_cleaned[,-c(11)]
 
 #normalizing with range between -1 and 1
 max(music_cleaned$song.hotttnesss)
+min(music_cleaned$song.hotttnesss)
 remove(nrml_music)
 col <- ncol(music_cleaned)
 newmin = -1
 newmax= 1
-str(nrml_music) 
 nrml_music <- 0
 for(j in 1:col){
   
@@ -178,7 +238,7 @@ distance = dist(nrml_music)
 
 
 
-kc <- kmeans(nrml_music,4)
+kc <- kmeans(nrml_music,5)
 
 #center of each cluster
 kc$centers
@@ -187,6 +247,7 @@ table(music_cleaned$tempo, kc$cluster)
 
 plot(music_cleaned$song.hotttnesss ~ music_cleaned$artist.hotttnesss, data = music_cleaned,col=kc$cluster)
 plot(music_cleaned[c("artist.hotttnesss", "song.hotttnesss")], col=kc$cluster)
+plot(music_cleaned[c("artist.hotttnesss", "tempo")], col=kc$cluster)
 plot(music_cleaned[c("bars_start", "song.hotttnesss")], col=kc$cluster)
 plot(music_cleaned[c("beats_start", "song.hotttnesss")], col=kc$cluster)
 plot(music_cleaned[c("duration", "song.hotttnesss")], col=kc$cluster)
@@ -195,6 +256,6 @@ plot(music_cleaned[c("loudness", "song.hotttnesss")], col=kc$cluster)
 plot(music_cleaned[c("start_of_fade_out", "song.hotttnesss")], col=kc$cluster)
 plot(music_cleaned[c("tatums_start", "song.hotttnesss")], col=kc$cluster)
 plot(music_cleaned[c("song.hotttnesss", "tempo")], col=kc$cluster)
-plot(music_cleaned[c("tempo", "song.hotttnesss")], col=kc$cluster)
-#plot(music_cleaned[c("time_signature", "song.hotttnesss")], col=kc$cluster)
+plot(music_cleaned[c("tempo", "artist.hotttnesss")], col=kc$cluster)
+
 
