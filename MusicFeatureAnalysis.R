@@ -20,8 +20,7 @@ dim(music_cleaned)
 str(music_cleaned)
 #getting the number  of NAs 
 sum(is.na(music_cleaned$song.hotttnesss))
-#export to a csv file 
-write.csv(music_cleaned, file='musicCleand.csv')
+
 #checking the number of missing values for each column
 sum(is.na(music_cleaned$artist.hotttnesss))
 sum(is.na(music_cleaned$bars_start))
@@ -172,6 +171,9 @@ with(music_cleaned,text(music_cleaned$song.hotttnesss~ music_cleaned$artist.hott
 #removing the nominal value
 music_cleaned <- music_cleaned[,-c(11)]
 
+#export fully cleaned dataset to a csv file 
+write.csv(music_cleaned, file='musicCleand.csv')
+
 #normalizing with range between -1 and 1 (for more accurate)
 col <- ncol(music_cleaned)
 newmin = -1
@@ -200,7 +202,7 @@ max(nrml_music$song.hotttnesss)
 #calculating the distance matrix
 distance = dist(nrml_music)
 #clustring the normalized dataset into three cluster with k-means package
-kc <- kmeans(nrml_music,4)
+kc <- kmeans(nrml_music,5)
 
 #center of each cluster
 kc$centers
