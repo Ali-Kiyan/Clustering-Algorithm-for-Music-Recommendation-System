@@ -9,15 +9,20 @@ install.packages("dplyr")
 library(stringr) 
 library(cluster)
 library(dplyr)
+library(ggplot2)
+
 #reading data set 
 music <- read.csv("music.csv", header=T) 
 #selecting musiclly significant features for analysis
-music_cleaned <- music[,c(1, 7, 9, 10, 11, 18, 24,26, 28, 29, 30, 32)]
+music_cleaned <- music[,c(1, 7, 10, 11, 18, 24,26, 28, 29, 30, 32)]
 #check if there is any NA in the dataset 
 any(is.na(music_cleaned))
 #checking the structure and dimention of the dataset 
 dim(music_cleaned)
 str(music_cleaned)
+#song popularity histogram
+hist(music_cleaned$song.hotttnesss ,col=c(1,2,3,4,5,6,7,8,9,10))
+
 #getting the number  of NAs 
 sum(is.na(music_cleaned$song.hotttnesss))
 
@@ -35,35 +40,34 @@ sum(is.na(music_cleaned$tempo))
 sum(is.na(music_cleaned$time_signature))
 sum(is.na(music_cleaned$terms))
 
-#song popularity histogram
-hist(music_cleaned$song.hotttnesss ,col=c(1,2,3,4,5,6,7,8,9,10))
 
 #using stringr and dplyr retrun a separate dataset if the track has one of the 5 main genre type in its terms column 
 #Rock dataset
-#contains_rock <- music_cleaned %>% 
-#  filter(str_detect(music_cleaned$terms, "rock"))
-#nrow(contains_rock)
+contains_rock <- music_cleaned %>% 
+  filter(str_detect(music_cleaned$terms, "rock"))
+nrow(contains_rock)
 #Jazz dataset
 contains_Jazz <- music_cleaned %>% 
   filter(str_detect(music_cleaned$terms, "jazz"))
 nrow(contains_Jazz)
 #Pop dataset 
 #contains_Pop <- music_cleaned %>% 
-#  filter(str_detect(music_cleaned$terms, "pop"))
+#filter(str_detect(music_cleaned$terms, "pop"))
 #nrow(contains_Pop)
 #classic dataset
 contains_Classic <- music_cleaned %>% 
   filter(str_detect(music_cleaned$terms, "classic"))
 nrow(contains_Classic)
 #country dataset
-#contains_Country <- music_cleaned %>% 
-#  filter(str_detect(music_cleaned$terms, "country"))
-#nrow(contains_Country)
+contains_Country <- music_cleaned %>% 
+  filter(str_detect(music_cleaned$terms, "country"))
+nrow(contains_Country)
+
 
 #calculate the mean for each main genres 
 
 
-#Rock_Song_hotness_mean <- mean(contains_rock$song.hotttnesss, na.rm = TRUE)
+Rock_Song_hotness_mean <- mean(contains_rock$song.hotttnesss, na.rm = TRUE)
 
 
 Jazz_Song_hotness_mean <- mean(contains_Jazz$song.hotttnesss, na.rm = TRUE)
@@ -75,7 +79,7 @@ Jazz_Song_hotness_mean <- mean(contains_Jazz$song.hotttnesss, na.rm = TRUE)
 Classic_Song_hotness_mean <- mean(contains_Classic$song.hotttnesss, na.rm = TRUE)
 
 
-#Country_Song_hotness_mean <- mean(contains_Country$song.hotttnesss, na.rm = TRUE)
+Country_Song_hotness_mean <- mean(contains_Country$song.hotttnesss, na.rm = TRUE)
 
 
 #3.impute the mean to every NA row
@@ -84,15 +88,15 @@ length <- nrow(music_cleaned)
 
 #for Rock Tracks 
 #for(i in 1:length) 
-#{
-#  if(is.na(music_cleaned$song.hotttnesss[i]))
-#  {
-#    if(grepl("rock", music_cleaned$terms[i]))
-#      {
-#         music_cleaned$song.hotttnesss[i] <- Rock_Song_hotness_mean
-#      }
-#  }
-#}
+{
+  if(is.na(music_cleaned$song.hotttnesss[i]))
+  {
+    if(grepl("rock", music_cleaned$terms[i]))
+      {
+         music_cleaned$song.hotttnesss[i] <- Rock_Song_hotness_mean
+      }
+  }
+}
 #remaining NA rows 
 #sum(is.na(music_cleaned))
 #for Jazz Tracks
@@ -136,16 +140,16 @@ for(i in 1:length)
 #remaining NA rows 
 sum(is.na(music_cleaned))
 #for country Tracks
-#for(i in 1:length) 
-#{
-#  if(is.na(music_cleaned$song.hotttnesss[i]))
-#  {
-#    if(grepl("country", music_cleaned$terms[i]))
-#    {
-#      music_cleaned$song.hotttnesss[i] <- Country_Song_hotness_mean
-#    }
-#  }
-#}
+for(i in 1:length) 
+{
+  if(is.na(music_cleaned$song.hotttnesss[i]))
+  {
+    if(grepl("country", music_cleaned$terms[i]))
+    {
+      music_cleaned$song.hotttnesss[i] <- Country_Song_hotness_mean
+    }
+  }
+}
 #remaining NA rows 
 #sum(is.na(music_cleaned))
 #getting the number  of NAs 
@@ -154,17 +158,26 @@ sum(is.na(music_cleaned$song.hotttnesss))
 
 #eliminating NA left in  the dataset
 music_cleaned <- music_cleaned[complete.cases(music_cleaned),]
+#checking the number of zero values for the column when zero value is meaningless
+sum(music_cleaned$loudness == 0)
+sum(music_cleaned$tempo ==0)
 #removing zeros in the rows
 #music_cleaned <- music_cleaned[-which(music_cleaned$song.hotttnesss == 0),] 
 #using subset to eliminate zeros (alternative to perivious line)
 #music_cleaned <- subset(music_cleaned,song.hotttnesss!=0)
+music_cleaned <- subset(music_cleaned,tempo!=0)
+music_cleaned <- subset(music_cleaned,loudness!=0)
 #num of complete case (without NA)
 sum(as.numeric(complete.cases(music_cleaned)))
 
 head(music_cleaned)
 #getting the pair of clusters
 pairs(music_cleaned)
-#scatter plot for a sample attribute
+#scatter plot for a sample attribute (checking data)
+qplot(music_cleaned$artist.hotttnesss, music_cleaned$song.hotttnesss)
+qplot(music_cleaned$tempo, music_cleaned$song.hotttnesss)
+qplot(music_cleaned$loudness, music_cleaned$song.hotttnesss)
+qplot(music_cleaned$tatums_start, music_cleaned$song.hotttnesss)
 plot(music_cleaned$song.hotttnesss~ music_cleaned$tempo, data= music_cleaned)
 #adding the terms(genre) --a lot of calculation
 with(music_cleaned,text(music_cleaned$song.hotttnesss~ music_cleaned$artist.hotttnesss, labels=music_cleaned$terms,pos=4,cex=.6))
@@ -212,12 +225,17 @@ table(music_cleaned$tempo, kc$cluster)
 
 #results
 plot(music_cleaned$song.hotttnesss ~ music_cleaned$artist.hotttnesss, data = music_cleaned,col=kc$cluster)
+plot(kc$centers)
 plot(music_cleaned$song.hotttnesss ~ music_cleaned$tempo, data = music_cleaned,col=kc$cluster)
 plot(music_cleaned$song.hotttnesss ~ music_cleaned$loudness, data = music_cleaned,col=kc$cluster)
 plot(music_cleaned$song.hotttnesss ~ music_cleaned$end_of_fade_in, data = music_cleaned,col=kc$cluster)
 plot(music_cleaned$song.hotttnesss ~ music_cleaned$start_of_fade_out, data = music_cleaned,col=kc$cluster)
 plot(music_cleaned$song.hotttnesss ~ music_cleaned$tatums_start, data = music_cleaned,col=kc$cluster)
 plot(music_cleaned$song.hotttnesss ~ music_cleaned$loudness, data = music_cleaned,col=kc$cluster)
+plot(music_cleaned$tempo ~ music_cleaned$artist.hotttnesss, data = music_cleaned,col=kc$cluster)
+plot(music_cleaned$artist.hotttnesss ~ music_cleaned$tempo, data = music_cleaned,col=kc$cluster)
+plot(music_cleaned$artist.hotttnesss ~ music_cleaned$loudness, data = music_cleaned,col=kc$cluster)
+plot(music_cleaned$artist.hotttnesss ~ music_cleaned$loudness, data = music_cleaned,col=kc$cluster)
 
 
 
