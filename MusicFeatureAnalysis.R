@@ -5,11 +5,15 @@ install.packages("stringr")
 install.packages("cluster")
 #for filetring based on string in datasets 
 install.packages("dplyr")
+#for plotting 
+install.packages("ggplot")
+install.packages("psych")
 #using respective packages
 library(stringr) 
 library(cluster)
 library(dplyr)
-library(ggplot2)
+library(ggplot2) #for plotting
+library(psych)
 
 #reading data set 
 music <- read.csv("music.csv", header=T) 
@@ -181,6 +185,17 @@ qplot(music_cleaned$tatums_start, music_cleaned$song.hotttnesss)
 plot(music_cleaned$song.hotttnesss~ music_cleaned$tempo, data= music_cleaned)
 #adding the terms(genre) --a lot of calculation
 with(music_cleaned,text(music_cleaned$song.hotttnesss~ music_cleaned$artist.hotttnesss, labels=music_cleaned$terms,pos=4,cex=.6))
+#backing up the dataset 
+music_cleaned_backup <- music_cleaned
+music_cleaned_backup$terms <- as.factor(music_cleaned_backup$terms) 
+str(music_cleaned_backup)
+mainGenre <- rbind(contains_rock, contains_Jazz, contains_Classic, contains_Country)
+dim(mainGenre)
+mainGenre
+mainGenre$terms <- as.factor(mainGenre$terms)
+install.packages("psych")
+library(psych)
+pairs.panels(music_cleaned)
 #removing the nominal value
 music_cleaned <- music_cleaned[,-c(11)]
 
@@ -199,7 +214,6 @@ for(j in 1:col){
   oldmax <- max(music_cleaned[j])
   current <- music_cleaned[j]
   temp <- ((current-oldmin)/(oldmax-oldmin))*(newmax-newmin) + newmin
-  temp <- as.data.frame(temp)
   nrml_music <- cbind(nrml_music, data.frame(temp))
 }
 #removing extra columns
@@ -215,7 +229,7 @@ max(nrml_music$song.hotttnesss)
 #calculating the distance matrix
 distance = dist(nrml_music)
 #clustring the normalized dataset into three cluster with k-means package
-kc <- kmeans(nrml_music,5)
+kc <- kmeans(nrml_music,3)
 
 #center of each cluster
 kc$centers
